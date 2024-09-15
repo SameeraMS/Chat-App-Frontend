@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import io from 'socket.io-client';
 
 export default function Chat() {
@@ -46,7 +46,8 @@ export default function Chat() {
     const sendMessage = () => {
         if (message.trim()) {
             setMessages((prevMessages) => [...prevMessages, `You: ${message}`]);
-            socketRef.current.emit('newMessage', { text: message });
+            socketRef.current.emit('newMessage', {text: message});
+            socketRef.current.emit('saveMessage', {text: message});
             setMessage('');
         }
     };
@@ -57,10 +58,11 @@ export default function Chat() {
                 #chat-container {
                     display: flex;
                     flex-direction: column;
-                    width: 800px;
+                    width: 90vw;
+                    max-width: 800px;
                     height: 600px; /* Adjust this as needed */
                     margin: 50px auto;
-                    background-color: white;
+                    background-color: #1B1B20;
                     border-radius: 8px;
                     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
                     overflow: hidden;
@@ -70,7 +72,6 @@ export default function Chat() {
                     flex-grow: 1;
                     padding: 20px;
                     overflow-y: auto;
-                    border-bottom: 1px solid #ddd;
                 }
 
                 .message {
@@ -82,43 +83,60 @@ export default function Chat() {
                 }
 
                 .message-left {
-                    background-color: #e1f0ff;
+                    color: white;
+                    background-color: #303132;
+                    border-radius: 20px;
                     float: left;
                 }
 
                 .message-right {
-                    background-color: #d1faff;
+                    color: white;
+                    background-color: #315FF4;
+                    border-radius: 20px;
                     float: right;
+                }
+                
+                .message-center {
+                    width: fit-content;
+                    color: white;
+                    margin-left: 50%;
+                    transform: translateX(-50%);
+                    text-align: center;
                 }
 
                 #message-box {
                     display: flex;
                     align-items: center;
                     padding: 10px;
-                    border-top: 1px solid #ddd;
-                    background-color: #f9f9f9;
+                    background-color: #1B1B20;
                     position: relative; /* Keep it fixed at the bottom */
                 }
 
                 #message-input {
                     flex-grow: 1;
-                    padding: 10px;
+                    padding: 20px;
                     border: 1px solid #ddd;
-                    border-radius: 5px;
+                    border-radius: 20px;
                     margin-right: 10px;
+                    background-color: #303132;
+                    color: white;
                 }
 
                 #send-button {
-                    padding: 10px 20px;
-                    background-color: #2889a7;
+                    padding: 20px 20px;
+                    background-color: #315FF4;
                     color: white;
                     border: none;
-                    border-radius: 5px;
+                    border-radius: 20px;
                     cursor: pointer;
                 }
 
                 #send-button:hover {
-                    background-color: #216188;
+                    background-color: #315FF4;
+                }
+                
+                #send-button i {
+                    font-size: 20px;
                 }
 
                 #username-input {
@@ -145,11 +163,14 @@ export default function Chat() {
 
             {isRegistered ? (
                 <>
+                    <link rel="stylesheet"
+                          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"/>
+
                     <div id="chat">
                         {messages.map((msg, idx) => (
                             <div key={idx}
-                                 className={`message ${msg.startsWith('You') ? 'message-right' : 'message-left'}`}>
-                                {msg}
+                                 className={`message ${msg.startsWith('You') ? msg.startsWith('You have joined the chat') ? 'message-center' : 'message-right' : msg.endsWith('left the chat') ? 'message-center' : msg.endsWith('joined the chat') ? 'message-center' : 'message-left'}`}>
+                                {msg.startsWith('You: ') ? msg.split(': ')[1] : msg}
                             </div>
                         ))}
                     </div>
@@ -163,7 +184,7 @@ export default function Chat() {
                             placeholder="Type your message here..."
                         />
                         <button id="send-button" onClick={sendMessage}>
-                            Send
+                            <i className="fas fa-paper-plane"></i>
                         </button>
                     </div>
                 </>
